@@ -12,13 +12,15 @@ class DisasterController extends Controller
 {
     public function index()
     {
-        $disasters = Disaster::all();
+        $disasters = Disaster::orderBy('id', 'desc')->get();
+
         return response()->json([
             'status' => true,
             'message' => 'Disasters retrieved successfully',
             'data' => $disasters
         ]);
     }
+
 
     public function show($id)
     {
@@ -62,7 +64,7 @@ class DisasterController extends Controller
         $disaster->description = $request->description;
         $disaster->location = $request->location;
         $disaster->author = $authorName;
-        
+
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('disasters', 'public');
@@ -148,6 +150,17 @@ class DisasterController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Disaster deleted successfully',
+        ]);
+    }
+
+    public function getAllDisastersByAuthor()
+    {
+        $authorName = Auth::user()->name;
+        $disasters = Disaster::where('author', $authorName)->get();
+        return response()->json([
+            'status' => true,
+            'message' => 'Disasters retrieved successfully',
+            'data' => $disasters
         ]);
     }
 }

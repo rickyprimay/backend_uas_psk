@@ -11,9 +11,11 @@ Route::group(['prefix' => 'auth'], function () {
   Route::get('/profile', [AuthController::class, 'profile'])->name('auth.profile')->middleware('auth:api');
 });
 
+Route::get('/disasters', [DisasterController::class, 'index']);
+Route::get('/disasters/{id}', [DisasterController::class, 'show']);
+
 Route::group(['middleware' => 'auth:api'], function () {
-  Route::get('/disasters', [DisasterController::class, 'index']);
-  Route::get('/disasters/{id}', [DisasterController::class, 'show']);
+  Route::get('/disasters/get-by-author', [DisasterController::class, 'getAllDisastersByAuthor']);
   Route::post('/disasters', [DisasterController::class, 'store']);
   Route::put('/disasters/{id}', [DisasterController::class, 'update']);
   Route::delete('/disasters/{id}', [DisasterController::class, 'destroy']);
