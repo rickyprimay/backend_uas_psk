@@ -65,10 +65,9 @@ class DisasterController extends Controller
         $disaster->location = $request->location;
         $disaster->author = $authorName;
 
-
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('disasters', 'public');
-            $disaster->image = $path;
+            $disaster->image = asset('storage/' . $path);
         }
 
         $disaster->save();
@@ -94,7 +93,7 @@ class DisasterController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'description' => 'required|string|max:1000',
+            'description' => 'required|string',
             'location' => 'required|string|max:255',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ]);
@@ -114,11 +113,11 @@ class DisasterController extends Controller
 
         if ($request->hasFile('image')) {
             if ($disaster->image) {
-                Storage::disk('public')->delete($disaster->image);
+                Storage::disk('public')->delete(str_replace('storage/', '', $disaster->image));
             }
 
             $path = $request->file('image')->store('disasters', 'public');
-            $disaster->image = $path;
+            $disaster->image = asset('storage/' . $path);
         }
 
         $disaster->save();
@@ -129,6 +128,7 @@ class DisasterController extends Controller
             'data' => $disaster
         ]);
     }
+
 
     public function destroy($id)
     {
@@ -161,6 +161,35 @@ class DisasterController extends Controller
             'status' => true,
             'message' => 'Disasters retrieved successfully',
             'data' => $disasters
+        ]);
+    }
+
+    public function countAllDisasterr()
+    {
+        $count = Disaster::count();
+        return response()->json([
+            'status' => true,
+            'message' => 'Disasters count retrieved successfully',
+            'data' => $count
+        ]);
+    }
+
+    public function countDisastersByAuthor()
+    {
+        $authorName = Auth::user()?->name;
+        if (!$authorName) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+
+        $count = Disaster::where('author', $authorName)->count();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Disasters count retrieved successfully',
+            'data' => $count
         ]);
     }
 }
